@@ -1,0 +1,442 @@
+diff -urN -x CYGWIN-PATCHES -x 'aclocal.m4*' -x autom4te.cache -x config.cache -x config.log -x config.status -x config.h -x config.h.in -x ABOUT-NLS -x Makefile.in.in -x Makevars.template -x '*SlackBuild*' -x '*.egg-info' -x '*.class' -x '*.pyc' -x '*.mo' -x '*.gmo' -x '*.orig' -x '*.rej' -x '*.spec' -x '*.temp' -x '*~' -x '*.stackdump' -x COPYING -x INSTALL -x compile -x config-ml.in -x config.guess -x config.sub -x depcomp -x elisp-comp -x install-sh -x ltmain.sh -x mdate-sh -x missing -x mkinstalldirs -x py-compile -x symlink-tree -x texinfo.tex -x ylwrap -x omf.make -x xmldocs.make -x gnome-doc-utils.make -x gnome-doc-utils.m4 -x intltool.m4 -x intltool-extract -x intltool-extract.in -x intltool-merge -x intltool-merge.in -x intltool-update -x intltool-update.in -x configure -x config.hin -x libtool.ac origsrc/db-3.3.11/dist/Makefile.in src/db-3.3.11/dist/Makefile.in
+--- origsrc/db-3.3.11/dist/Makefile.in	2001-07-06 15:53:16.000000000 -0500
++++ src/db-3.3.11/dist/Makefile.in	2007-06-17 18:03:43.218750000 -0500
+@@ -12,10 +12,11 @@
+ includedir=@includedir@
+ libdir=	@libdir@
+ docdir=	$(prefix)/docs
++EXEEXT= @EXEEXT@
+ 
+ dmode=	755
+-emode=	555
+-fmode=	444
++emode=	755
++fmode=	644
+ 
+ transform=@program_transform_name@
+ 
+@@ -46,6 +47,7 @@
+ SOFLAGS=	@SOFLAGS@
+ SOMAJOR=	@DB_VERSION_MAJOR@
+ SOVERSION=	@DB_VERSION_MAJOR@.@DB_VERSION_MINOR@
++XSOLINK=	@XSOLINK@
+ 
+ ##################################################
+ # C API.
+@@ -118,6 +120,7 @@
+ # Tcl support is optional and requires shared libraries.
+ ##################################################
+ TCFLAGS=	@TCFLAGS@
++TSOLINK=		@TSOLINK@
+ LIBTSO_LIBS=	@LIBTSO_LIBS@
+ libtso_base=	libdb_tcl
+ libtso=		$(libtso_base)-$(SOVERSION).@SOSUFFIX@
+@@ -238,10 +241,12 @@
+ 	perf_op@o@ perf_spawn@o@ perf_thread@o@ perf_trickle@o@ perf_txn@o@ \
+ 	perf_util@o@
+ 
+-UTIL_PROGS=\
++UTILPROGS=\
+ 	@ADDITIONAL_PROGS@ db_archive db_checkpoint db_deadlock \
+ 	db_dump db_load db_printlog db_recover db_stat db_upgrade db_verify
+ 
++UTIL_PROGS=$(UTILPROGS:%=%@EXEEXT@)
++
+ ##################################################
+ # We're building a standard library or a RPM file hierarchy, potentially
+ # for Embedix.  Note: "all" must be the first target in the Makefile.
+@@ -270,10 +275,10 @@
+ 	$(SOLINK) $(SOFLAGS) -o $@ $(JAVA_OBJS) $(C_OBJS) $(LDFLAGS) $(LIBJSO_LIBS)
+ 
+ $(libtso_target): $(TCL_OBJS) $(C_OBJS)
+-	$(SOLINK) $(SOFLAGS) -o $@ $(TCL_OBJS) $(C_OBJS) $(LDFLAGS) $(LIBTSO_LIBS)
++	$(TSOLINK) $(SOFLAGS) -o $@ $(TCL_OBJS) $(C_OBJS) $(LDFLAGS) $(LIBTSO_LIBS)
+ 
+ $(libxso_target): $(CXX_OBJS) $(C_OBJS)
+-	$(SOLINK) $(SOFLAGS) -o $@ $(CXX_OBJS) $(C_OBJS) $(LDFLAGS) $(LIBXSO_LIBS)
++	$(XSOLINK) $(SOFLAGS) -o $@ $(CXX_OBJS) $(C_OBJS) $(LDFLAGS) $(LIBXSO_LIBS)
+ 
+ ##################################################
+ # Creating individual dependencies and actions for building class
+@@ -293,58 +298,58 @@
+ ##################################################
+ # Utilities
+ ##################################################
+-berkeley_db_svc: $(RPC_SRV_OBJS) util_log@o@ $(DEF_LIB)
++berkeley_db_svc$(EXEEXT): $(RPC_SRV_OBJS) util_log@o@ $(DEF_LIB)
+ 	$(CCLINK) -o $@ $(LDFLAGS) \
+ 	    $(RPC_SRV_OBJS) util_log@o@ $(DEF_LIB) $(LIBS)
+ 	$(POSTLINK) $@
+ 
+-db_archive: db_archive@o@ util_sig@o@ $(DEF_LIB)
++db_archive$(EXEEXT): db_archive@o@ util_sig@o@ $(DEF_LIB)
+ 	$(CCLINK) -o $@ $(LDFLAGS) \
+ 	    db_archive@o@ util_sig@o@ $(DEF_LIB) $(LIBS)
+ 	$(POSTLINK) $@
+ 
+-db_checkpoint: db_checkpoint@o@ util_log@o@ util_sig@o@ $(DEF_LIB)
++db_checkpoint$(EXEEXT): db_checkpoint@o@ util_log@o@ util_sig@o@ $(DEF_LIB)
+ 	$(CCLINK) -o $@ $(LDFLAGS) \
+ 	    db_checkpoint@o@ util_log@o@ util_sig@o@ $(DEF_LIB) $(LIBS)
+ 	$(POSTLINK) $@
+ 
+-db_deadlock: db_deadlock@o@ util_log@o@ util_sig@o@ $(DEF_LIB)
++db_deadlock$(EXEEXT): db_deadlock@o@ util_log@o@ util_sig@o@ $(DEF_LIB)
+ 	$(CCLINK) -o $@ $(LDFLAGS) \
+ 	    db_deadlock@o@ util_log@o@ util_sig@o@ $(DEF_LIB) $(LIBS)
+ 	$(POSTLINK) $@
+ 
+-db_dump: db_dump@o@ util_sig@o@ $(DEF_LIB)
++db_dump$(EXEEXT): db_dump@o@ util_sig@o@ $(DEF_LIB)
+ 	$(CCLINK) -o $@ $(LDFLAGS) db_dump@o@ util_sig@o@ $(DEF_LIB) $(LIBS)
+ 	$(POSTLINK) $@
+ 
+-db_dump185: db_dump185@o@ @LIBOBJS@
++db_dump185$(EXEEXT): db_dump185@o@ @LIBOBJS@
+ 	$(CCLINK) -o $@ $(LDFLAGS) db_dump185@o@ @LIBOBJS@ $(DB185LIB)
+ 	$(POSTLINK) $@
+ 
+-db_load: db_load@o@ util_sig@o@ $(DEF_LIB)
++db_load$(EXEEXT): db_load@o@ util_sig@o@ $(DEF_LIB)
+ 	$(CCLINK) -o $@ $(LDFLAGS) db_load@o@ util_sig@o@ $(DEF_LIB) $(LIBS)
+ 	$(POSTLINK) $@
+ 
+-db_printlog: db_printlog@o@ util_sig@o@ $(DEF_LIB)
++db_printlog$(EXEEXT): db_printlog@o@ util_sig@o@ $(DEF_LIB)
+ 	$(CCLINK) -o $@ $(LDFLAGS) \
+ 	    db_printlog@o@ util_sig@o@ $(DEF_LIB) $(LIBS)
+ 	$(POSTLINK) $@
+ 
+-db_recover: db_recover@o@ util_sig@o@ $(DEF_LIB)
++db_recover$(EXEEXT): db_recover@o@ util_sig@o@ $(DEF_LIB)
+ 	$(CCLINK) -o $@ $(LDFLAGS) \
+ 	    db_recover@o@ util_sig@o@ $(DEF_LIB) $(LIBS)
+ 	$(POSTLINK) $@
+ 
+-db_stat: db_stat@o@ util_sig@o@ $(DEF_LIB)
++db_stat$(EXEEXT): db_stat@o@ util_sig@o@ $(DEF_LIB)
+ 	$(CCLINK) -o $@ $(LDFLAGS) db_stat@o@ util_sig@o@ $(DEF_LIB) $(LIBS)
+ 	$(POSTLINK) $@
+ 
+-db_upgrade: db_upgrade@o@ util_sig@o@ $(DEF_LIB)
++db_upgrade$(EXEEXT): db_upgrade@o@ util_sig@o@ $(DEF_LIB)
+ 	$(CCLINK) -o $@ $(LDFLAGS) \
+ 	    db_upgrade@o@ util_sig@o@ $(DEF_LIB) $(LIBS)
+ 	$(POSTLINK) $@
+ 
+-db_verify: db_verify@o@ util_sig@o@ $(DEF_LIB)
++db_verify$(EXEEXT): db_verify@o@ util_sig@o@ $(DEF_LIB)
+ 	$(CCLINK) -o $@ $(LDFLAGS) \
+ 	    db_verify@o@ util_sig@o@ $(DEF_LIB) $(LIBS)
+ 	$(POSTLINK) $@
+@@ -508,7 +513,7 @@
+ 	ex_btrec ex_btrec@o@ ex_dbclient ex_dbclient@o@ ex_env ex_env@o@ \
+ 	ex_lock ex_lock@o@ ex_mpool ex_mpool@o@ ex_thread ex_thread@o@ \
+ 	ex_tpcb ex_tpcb@o@ excxx_access excxx_btrec excxx_env excxx_lock \
+-	excxx_mpool excxx_tpcb rpmrc
++	excxx_mpool excxx_tpcb rpmrc *.exe
+ 
+ clean:
+ 	$(rm) -rf $(C_OBJS)
+@@ -567,7 +572,7 @@
+ 	$(CC) $(CFLAGS) -I$(srcdir)/test_server $?
+ dbs_yield@o@: $(srcdir)/test_server/dbs_yield.c
+ 	$(CC) $(CFLAGS) -I$(srcdir)/test_server $?
+-dbs: $(DBS_OBJS) $(DEF_LIB)
++dbs$(EXEEXT): $(DBS_OBJS) $(DEF_LIB)
+ 	$(CCLINK) -o $@ \
+ 	    $(LDFLAGS) $(DBS_OBJS) $(DEF_LIB) @TEST_LIBS@ $(LIBS)
+ 	$(POSTLINK) $@
+@@ -602,14 +607,14 @@
+ 	$(CC) $(CFLAGS) -I$(srcdir)/test_perf $?
+ perf_util@o@: $(srcdir)/test_perf/perf_util.c
+ 	$(CC) $(CFLAGS) -I$(srcdir)/test_perf $?
+-db_perf: $(DBPERF_OBJS) $(DEF_LIB)
++db_perf$(EXEEXT): $(DBPERF_OBJS) $(DEF_LIB)
+ 	$(CCLINK) -o $@ \
+ 	    $(LDFLAGS) $(DBPERF_OBJS) $(DEF_LIB) @TEST_LIBS@ $(LIBS) -lm
+ 	$(POSTLINK) $@
+ 
+ tm@o@: $(srcdir)/mutex/tm.c
+ 	$(CC) $(CFLAGS) $?
+-tm: tm@o@ $(DEF_LIB)
++tm$(EXEEXT): tm@o@ $(DEF_LIB)
+ 	$(CCLINK) -o $@ $(LDFLAGS) tm@o@ $(DEF_LIB) $(LIBS)
+ 	$(POSTLINK) $@
+ 
+@@ -618,50 +623,50 @@
+ ##################################################
+ ex_access@o@: $(srcdir)/examples_c/ex_access.c
+ 	$(CC) $(CFLAGS) $?
+-ex_access: ex_access@o@ $(DEF_LIB)
++ex_access$(EXEEXT): ex_access@o@ $(DEF_LIB)
+ 	$(CCLINK) -o $@ $(LDFLAGS) ex_access@o@ $(DEF_LIB) $(LIBS)
+ 	$(POSTLINK) $@
+ 
+ ex_btrec@o@: $(srcdir)/examples_c/ex_btrec.c
+ 	$(CC) $(CFLAGS) $?
+-ex_btrec: ex_btrec@o@ $(DEF_LIB)
++ex_btrec$(EXEEXT): ex_btrec@o@ $(DEF_LIB)
+ 	$(CCLINK) -o $@ $(LDFLAGS) ex_btrec@o@ $(DEF_LIB) $(LIBS)
+ 	$(POSTLINK) $@
+ 
+ ex_dbclient@o@: $(srcdir)/examples_c/ex_dbclient.c
+ 	$(CC) $(CFLAGS) $?
+-ex_dbclient: ex_dbclient@o@ $(DEF_LIB)
++ex_dbclient$(EXEEXT): ex_dbclient@o@ $(DEF_LIB)
+ 	$(CCLINK) -o $@ $(LDFLAGS) ex_dbclient@o@ $(DEF_LIB) $(LIBS)
+ 	$(POSTLINK) $@
+ 
+ ex_env@o@: $(srcdir)/examples_c/ex_env.c
+ 	$(CC) $(CFLAGS) $?
+-ex_env: ex_env@o@ $(DEF_LIB)
++ex_env$(EXEEXT): ex_env@o@ $(DEF_LIB)
+ 	$(CCLINK) -o $@ $(LDFLAGS) ex_env@o@ $(DEF_LIB) $(LIBS)
+ 	$(POSTLINK) $@
+ 
+ ex_lock@o@: $(srcdir)/examples_c/ex_lock.c
+ 	$(CC) $(CFLAGS) $?
+-ex_lock: ex_lock@o@ $(DEF_LIB)
++ex_lock$(EXEEXT): ex_lock@o@ $(DEF_LIB)
+ 	$(CCLINK) -o $@ $(LDFLAGS) ex_lock@o@ $(DEF_LIB) $(LIBS)
+ 	$(POSTLINK) $@
+ 
+ ex_mpool@o@: $(srcdir)/examples_c/ex_mpool.c
+ 	$(CC) $(CFLAGS) $?
+-ex_mpool: ex_mpool@o@ $(DEF_LIB)
++ex_mpool$(EXEEXT): ex_mpool@o@ $(DEF_LIB)
+ 	$(CCLINK) -o $@ $(LDFLAGS) ex_mpool@o@ $(DEF_LIB) $(LIBS)
+ 	$(POSTLINK) $@
+ 
+ ex_thread@o@: $(srcdir)/examples_c/ex_thread.c
+ 	$(CC) $(CFLAGS) $?
+-ex_thread: ex_thread@o@ $(DEF_LIB)
++ex_thread$(EXEEXT): ex_thread@o@ $(DEF_LIB)
+ 	$(CCLINK) -o $@ \
+ 	    $(LDFLAGS) ex_thread@o@ $(DEF_LIB) @TEST_LIBS@ $(LIBS)
+ 	$(POSTLINK) $@
+ 
+ ex_tpcb@o@: $(srcdir)/examples_c/ex_tpcb.c
+ 	$(CC) $(CFLAGS) $?
+-ex_tpcb: ex_tpcb@o@ $(DEF_LIB)
++ex_tpcb$(EXEEXT): ex_tpcb@o@ $(DEF_LIB)
+ 	$(CCLINK) -o $@ $(LDFLAGS) ex_tpcb@o@ $(DEF_LIB) $(LIBS)
+ 	$(POSTLINK) $@
+ 
+@@ -670,37 +675,37 @@
+ ##################################################
+ AccessExample@o@: $(srcdir)/examples_cxx/AccessExample.cpp
+ 	$(CXX) $(CXXFLAGS) $?
+-excxx_access: AccessExample@o@ $(DEF_LIB_CXX)
++excxx_access$(EXEEXT): AccessExample@o@ $(DEF_LIB_CXX)
+ 	$(CXXLINK) -o $@ $(LDFLAGS) AccessExample@o@ $(DEF_LIB_CXX) $(LIBS)
+ 	$(POSTLINK) $@
+ 
+ BtRecExample@o@: $(srcdir)/examples_cxx/BtRecExample.cpp
+ 	$(CXX) $(CXXFLAGS) $?
+-excxx_btrec: BtRecExample@o@ $(DEF_LIB_CXX)
++excxx_btrec$(EXEEXT): BtRecExample@o@ $(DEF_LIB_CXX)
+ 	$(CXXLINK) -o $@ $(LDFLAGS) BtRecExample@o@ $(DEF_LIB_CXX) $(LIBS)
+ 	$(POSTLINK) $@
+ 
+ EnvExample@o@: $(srcdir)/examples_cxx/EnvExample.cpp
+ 	$(CXX) $(CXXFLAGS) $?
+-excxx_env: EnvExample@o@ $(DEF_LIB_CXX)
++excxx_env$(EXEEXT): EnvExample@o@ $(DEF_LIB_CXX)
+ 	$(CXXLINK) -o $@ $(LDFLAGS) EnvExample@o@ $(DEF_LIB_CXX) $(LIBS)
+ 	$(POSTLINK) $@
+ 
+ LockExample@o@: $(srcdir)/examples_cxx/LockExample.cpp
+ 	$(CXX) $(CXXFLAGS) $?
+-excxx_lock: LockExample@o@ $(DEF_LIB_CXX)
++excxx_lock$(EXEEXT): LockExample@o@ $(DEF_LIB_CXX)
+ 	$(CXXLINK) -o $@ $(LDFLAGS) LockExample@o@ $(DEF_LIB_CXX) $(LIBS)
+ 	$(POSTLINK) $@
+ 
+ MpoolExample@o@: $(srcdir)/examples_cxx/MpoolExample.cpp
+ 	$(CXX) $(CXXFLAGS) $?
+-excxx_mpool: MpoolExample@o@ $(DEF_LIB_CXX)
++excxx_mpool$(EXEEXT): MpoolExample@o@ $(DEF_LIB_CXX)
+ 	$(CXXLINK) -o $@ $(LDFLAGS) MpoolExample@o@ $(DEF_LIB_CXX) $(LIBS)
+ 	$(POSTLINK) $@
+ 
+ TpcbExample@o@: $(srcdir)/examples_cxx/TpcbExample.cpp
+ 	$(CXX) $(CXXFLAGS) $?
+-excxx_tpcb: TpcbExample@o@ $(DEF_LIB_CXX)
++excxx_tpcb$(EXEEXT): TpcbExample@o@ $(DEF_LIB_CXX)
+ 	$(CXXLINK) -o $@ $(LDFLAGS) TpcbExample@o@ $(DEF_LIB_CXX) $(LIBS)
+ 	$(POSTLINK) $@
+ 
+diff -urN -x CYGWIN-PATCHES -x 'aclocal.m4*' -x autom4te.cache -x config.cache -x config.log -x config.status -x config.h -x config.h.in -x ABOUT-NLS -x Makefile.in.in -x Makevars.template -x '*SlackBuild*' -x '*.egg-info' -x '*.class' -x '*.pyc' -x '*.mo' -x '*.gmo' -x '*.orig' -x '*.rej' -x '*.spec' -x '*.temp' -x '*~' -x '*.stackdump' -x COPYING -x INSTALL -x compile -x config-ml.in -x config.guess -x config.sub -x depcomp -x elisp-comp -x install-sh -x ltmain.sh -x mdate-sh -x missing -x mkinstalldirs -x py-compile -x symlink-tree -x texinfo.tex -x ylwrap -x omf.make -x xmldocs.make -x gnome-doc-utils.make -x gnome-doc-utils.m4 -x intltool.m4 -x intltool-extract -x intltool-extract.in -x intltool-merge -x intltool-merge.in -x intltool-update -x intltool-update.in -x configure -x config.hin -x libtool.ac origsrc/db-3.3.11/dist/aclocal/tcl.ac src/db-3.3.11/dist/aclocal/tcl.ac
+--- origsrc/db-3.3.11/dist/aclocal/tcl.ac	2001-06-13 10:54:27.000000000 -0500
++++ src/db-3.3.11/dist/aclocal/tcl.ac	2007-06-17 18:29:02.328125000 -0500
+@@ -50,7 +50,7 @@
+ 
+ 	    # First check to see if --with-tclconfig was specified.
+ 	    if test "${with_tclconfig}" != no; then
+-		if test -f "${with_tclconfig}/tclConfig.sh" ; then
++		if test -e "${with_tclconfig}/tclConfig.sh" ; then
+ 		    ac_cv_c_tclconfig=`(cd ${with_tclconfig}; pwd)`
+ 		else
+ 		    AC_MSG_ERROR([${with_tclconfig} directory doesn't contain tclConfig.sh])
+@@ -59,8 +59,8 @@
+ 
+ 	    # check in a few common install locations
+ 	    if test x"${ac_cv_c_tclconfig}" = x ; then
+-		for i in `ls -d /usr/local/lib 2>/dev/null` ; do
+-		    if test -f "$i/tclConfig.sh" ; then
++		for i in `ls -d /usr/lib /usr/local/lib 2>/dev/null` ; do
++		    if test -e "$i/tclConfig.sh" ; then
+ 			ac_cv_c_tclconfig=`(cd $i; pwd)`
+ 			break
+ 		    fi
+@@ -80,7 +80,7 @@
+ AC_DEFUN(SC_LOAD_TCLCONFIG, [
+ 	AC_MSG_CHECKING([for existence of $TCL_BIN_DIR/tclConfig.sh])
+ 
+-	if test -f "$TCL_BIN_DIR/tclConfig.sh" ; then
++	if test -e "$TCL_BIN_DIR/tclConfig.sh" ; then
+ 		AC_MSG_RESULT([loading])
+ 		. $TCL_BIN_DIR/tclConfig.sh
+ 	else
+@@ -95,6 +95,11 @@
+ 	eval TCL_LIB_FLAG="${TCL_LIB_FLAG}"
+ 	eval "TCL_LIB_SPEC=\"${TCL_LIB_SPEC}\""
+ 
++	case "$host_os" in
++	aix*|cygwin*)
++		LIBTSO_LIBS="$LIBTSO_LIBS $TCL_LIB_SPEC $TCL_LIB_FLAG";;
++	esac
++
+ 	AC_SUBST(TCL_BIN_DIR)
+ 	AC_SUBST(TCL_SRC_DIR)
+ 	AC_SUBST(TCL_LIB_FILE)
+@@ -115,7 +120,7 @@
+ 	SC_PATH_TCLCONFIG
+ 	SC_LOAD_TCLCONFIG
+ 
+-	if test x"$TCL_PREFIX" != x && test -f "$TCL_PREFIX/include/tcl.h"; then
++	if test x"$TCL_PREFIX" != x && test -e "$TCL_PREFIX/include/tcl.h"; then
+ 		TCFLAGS="-I$TCL_PREFIX/include"
+ 	fi
+ 
+diff -urN -x CYGWIN-PATCHES -x 'aclocal.m4*' -x autom4te.cache -x config.cache -x config.log -x config.status -x config.h -x config.h.in -x ABOUT-NLS -x Makefile.in.in -x Makevars.template -x '*SlackBuild*' -x '*.egg-info' -x '*.class' -x '*.pyc' -x '*.mo' -x '*.gmo' -x '*.orig' -x '*.rej' -x '*.spec' -x '*.temp' -x '*~' -x '*.stackdump' -x COPYING -x INSTALL -x compile -x config-ml.in -x config.guess -x config.sub -x depcomp -x elisp-comp -x install-sh -x ltmain.sh -x mdate-sh -x missing -x mkinstalldirs -x py-compile -x symlink-tree -x texinfo.tex -x ylwrap -x omf.make -x xmldocs.make -x gnome-doc-utils.make -x gnome-doc-utils.m4 -x intltool.m4 -x intltool-extract -x intltool-extract.in -x intltool-merge -x intltool-merge.in -x intltool-update -x intltool-update.in -x configure -x config.hin -x libtool.ac origsrc/db-3.3.11/dist/configure.ac src/db-3.3.11/dist/configure.ac
+--- origsrc/db-3.3.11/dist/configure.ac	2001-07-10 14:32:09.000000000 -0500
++++ src/db-3.3.11/dist/configure.ac	2007-06-17 18:04:14.437500000 -0500
+@@ -60,6 +60,8 @@
+ AC_SUBST(SOLINK)
+ AC_SUBST(SOSUFFIX)
+ AC_SUBST(TEST_LIBS)
++AC_SUBST(TSOLINK)
++AC_SUBST(XSOLINK)
+ AC_SUBST(db_cv_path_embedix_install)
+ AC_SUBST(db_cv_path_rpm_archive)
+ AC_SUBST(o)
+@@ -242,7 +244,7 @@
+ AC_PROG_LIBTOOL
+ 
+ LIBTOOL="\$(SHELL) ./libtool"
+-SOSUFFIX=`sed -e '/^library_names_spec=/!d' -e 's/.*\.\([[a-zA-Z0-9_]]*\).*/\1/' ./libtool`
++SOSUFFIX=`./libtool --config | sed -e '/^shrext_cmds=/!d' -e 's/.*\.\([[a-zA-Z0-9_]]*\).*/\1/'`
+ SOFLAGS="-rpath \$(libdir)"
+ 
+ SAVE_CC="${MAKEFILE_CC}"
+@@ -250,9 +252,11 @@
+ MAKEFILE_CC="\$(LIBTOOL) --mode=compile ${SAVE_CC}"
+ MAKEFILE_CXX="\$(LIBTOOL) --mode=compile ${SAVE_CXX}"
+ MAKEFILE_CCLINK="\$(LIBTOOL) --mode=link ${SAVE_CC}"
+-MAKEFILE_CXXLINK="\$(LIBTOOL) --mode=link ${SAVE_CXX}"
++MAKEFILE_CXXLINK="\$(LIBTOOL) --tag=CXX --mode=link ${SAVE_CXX}"
+ 
+-SOLINK="\$(LIBTOOL) --mode=link ${SAVE_CC} -avoid-version"
++SOLINK="\$(LIBTOOL) --mode=link ${SAVE_CC} -avoid-version -no-undefined"
++TSOLINK="\$(LIBTOOL) --mode=link ${SAVE_CC} -module -avoid-version -no-undefined"
++XSOLINK="\$(LIBTOOL) --mode=link ${SAVE_CXX} -avoid-version -no-undefined"
+ INSTALLER="\$(LIBTOOL) --mode=install cp"
+ 
+ # Configure for shared libraries, static libraries, or both.  If both are
+@@ -322,52 +326,9 @@
+ 	if test "$JAR" = "nojar"; then
+ 		AC_MSG_ERROR([no jar utility in PATH])
+ 	fi
+-	AC_PATH_PROG(JAVACABS, javac, nojavac)
+ 	ADDITIONAL_LIBS="$ADDITIONAL_LIBS \$(libjso_target)"
+ 	ADDITIONAL_LANG="$ADDITIONAL_LANG java"
+ 	DEFAULT_INSTALL="${DEFAULT_INSTALL} install_java"
+-
+-# find the include directory relative to the javac executable
+-	while ls -ld "$JAVACABS" 2>/dev/null | grep " -> " >/dev/null; do
+-		AC_MSG_CHECKING(symlink for $JAVACABS)
+-		JAVACLINK=`ls -ld $JAVACABS | sed 's/.* -> //'`
+-		case "$JAVACLINK" in
+-		/*) JAVACABS="$JAVACLINK";;
+-# 'X' avoids triggering unwanted echo options.
+-		*) JAVACABS=`echo "X$JAVACABS" | sed -e 's/^X//' -e 's:[[^/]]*$::'`"$JAVACLINK";;
+-		esac
+-		AC_MSG_RESULT($JAVACABS)
+-	done
+-	JTOPDIR=`echo "$JAVACABS" | sed -e 's://*:/:g' -e 's:/[[^/]]*$::'`
+-	case "$host_os" in
+-		darwin*)	JTOPDIR=`echo "$JTOPDIR" | sed -e s:/[[^/]]*$::'`
+-				JNIHEADERDIR="$JTOPDIR/Headers";;
+-		*)		JNIHEADERDIR="$JTOPDIR/include";;
+-	esac
+-	if test -f "$JNIHEADERDIR/jni.h"; then
+-		CPPFLAGS="$CPPFLAGSS -I$JNIHEADERDIR"
+-	else
+-		JTOPDIR=`echo "$JTOPDIR" | sed -e 's:/[[^/]]*$::'`
+-		if test -f "$JTOPDIR/include/jni.h"; then
+-			CPPFLAGS="$CPPFLAGS -I$JTOPDIR/include"
+-		else
+-			AC_MSG_ERROR([cannot find java include files])
+-		fi
+-	fi
+-
+-# get the likely subdirectories for system specific java includes
+-	case "$host_os" in
+-	solaris*)	JINCSUBDIRS="solaris";;
+-	linux*)		JINCSUBDIRS="linux genunix";;
+-	*)		JINCSUBDIRS="genunix";;
+-	esac
+-
+-	for JINCSUBDIR in $JINCSUBDIRS
+-	do
+-		if test -d "$JTOPDIR/include/$JINCSUBDIR"; then
+-			CPPFLAGS="$CPPFLAGS -I$JTOPDIR/include/$JINCSUBDIR"
+-		fi
+-	done
+ else
+ 	JAVAC=nojavac
+ fi
+diff -urN -x CYGWIN-PATCHES -x 'aclocal.m4*' -x autom4te.cache -x config.cache -x config.log -x config.status -x config.h -x config.h.in -x ABOUT-NLS -x Makefile.in.in -x Makevars.template -x '*SlackBuild*' -x '*.egg-info' -x '*.class' -x '*.pyc' -x '*.mo' -x '*.gmo' -x '*.orig' -x '*.rej' -x '*.spec' -x '*.temp' -x '*~' -x '*.stackdump' -x COPYING -x INSTALL -x compile -x config-ml.in -x config.guess -x config.sub -x depcomp -x elisp-comp -x install-sh -x ltmain.sh -x mdate-sh -x missing -x mkinstalldirs -x py-compile -x symlink-tree -x texinfo.tex -x ylwrap -x omf.make -x xmldocs.make -x gnome-doc-utils.make -x gnome-doc-utils.m4 -x intltool.m4 -x intltool-extract -x intltool-extract.in -x intltool-merge -x intltool-merge.in -x intltool-update -x intltool-update.in -x configure -x config.hin -x libtool.ac origsrc/db-3.3.11/env/env_open.c src/db-3.3.11/env/env_open.c
+--- origsrc/db-3.3.11/env/env_open.c	2001-06-13 10:54:37.000000000 -0500
++++ src/db-3.3.11/env/env_open.c	2007-03-06 06:48:35.218750000 -0600
+@@ -32,6 +32,10 @@
+ #include "txn.h"
+ #include "clib_ext.h"
+ 
++#ifdef __lock_close
++#undef __lock_close
++#endif
++
+ static int __db_parse __P((DB_ENV *, char *));
+ static int __db_tmp_open __P((DB_ENV *, u_int32_t, char *, DB_FH *));
+ static int __dbenv_config __P((DB_ENV *, const char *, u_int32_t));
+Files origsrc/db-3.3.11/java/classes/db.jar and src/db-3.3.11/java/classes/db.jar differ
+diff -urN -x CYGWIN-PATCHES -x 'aclocal.m4*' -x autom4te.cache -x config.cache -x config.log -x config.status -x config.h -x config.h.in -x ABOUT-NLS -x Makefile.in.in -x Makevars.template -x '*SlackBuild*' -x '*.egg-info' -x '*.class' -x '*.pyc' -x '*.mo' -x '*.gmo' -x '*.orig' -x '*.rej' -x '*.spec' -x '*.temp' -x '*~' -x '*.stackdump' -x COPYING -x INSTALL -x compile -x config-ml.in -x config.guess -x config.sub -x depcomp -x elisp-comp -x install-sh -x ltmain.sh -x mdate-sh -x missing -x mkinstalldirs -x py-compile -x symlink-tree -x texinfo.tex -x ylwrap -x omf.make -x xmldocs.make -x gnome-doc-utils.make -x gnome-doc-utils.m4 -x intltool.m4 -x intltool-extract -x intltool-extract.in -x intltool-merge -x intltool-merge.in -x intltool-update -x intltool-update.in -x configure -x config.hin -x libtool.ac origsrc/db-3.3.11/lock/lock_region.c src/db-3.3.11/lock/lock_region.c
+--- origsrc/db-3.3.11/lock/lock_region.c	2001-06-13 10:54:45.000000000 -0500
++++ src/db-3.3.11/lock/lock_region.c	2007-03-06 06:52:22.859375000 -0600
+@@ -29,6 +29,13 @@
+ #include "rpc_client_ext.h"
+ #endif
+ 
++#ifdef __lock_init
++#undef __lock_init
++#endif
++#ifdef __lock_close
++#undef __lock_close
++#endif
++
+ static int  __lock_init __P((DB_ENV *, DB_LOCKTAB *));
+ static size_t
+ 	    __lock_region_size __P((DB_ENV *));
