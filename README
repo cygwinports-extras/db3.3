@@ -8,22 +8,20 @@ function calls, rather than sending messages to a remote server,
 eliminating the performance penalty of client-server architectures.
 
 Runtime requirements:
-  cygwin-1.5.24-2
+  cygwin-1.5.25-15
   jamvm-1.4.5-1	(for Java bindings)
-  tcl-8.4.15-1	(for Tcl bindings)
+  tcl-8.4.18-1	(for Tcl bindings)
 
 Build requirements:
-  cygwin-1.5.24-2
   autoconf2.5-2.61-1
-  binutils-20060817-1
-  cygport-0.3.1-1
+  binutils-20080523-2
+  cygport-0.3.13-1
   fastjar-0.94-1
-  gawk-3.1.5-4
+  gawk-3.1.6-1
   gcc-core-3.4.4-3
   gcc-g++-3.4.4-3
-  jamvm-1.4.5-1
   jikes-1.22-3
-  libtool1.5-1.5.23a-2
+  libtool-2.2.2-2
   make-3.81-1
   sed-4.1.5-2
 
@@ -45,6 +43,7 @@ Build instructions:
 This will create:
   /usr/src/db3.3-3.3.11.2-X-src.tar.bz2
   /usr/src/db3.3-3.3.11.2-X.tar.bz2
+  /usr/src/db3.3-doc-3.3.11.2-X.tar.bz2
   /usr/src/java-db3.3-3.3.11.2-X.tar.bz2
   /usr/src/libdb3.3-3.3.11.2-X.tar.bz2
   /usr/src/libdb3.3-devel-3.3.11.2-X.tar.bz2
@@ -55,8 +54,6 @@ This will create:
 Files included in the binary packages:
 
 (db3.3)
-  /etc/postinstall/db3.3.sh
-  /etc/preremove/db3.3.sh
   /usr/bin/db3.3_archive.exe
   /usr/bin/db3.3_checkpoint.exe
   /usr/bin/db3.3_deadlock.exe
@@ -67,7 +64,6 @@ Files included in the binary packages:
   /usr/bin/db3.3_stat.exe
   /usr/bin/db3.3_upgrade.exe
   /usr/bin/db3.3_verify.exe
-  /usr/share/doc/Cygwin/db3.3-3.3.11.2.README
   /usr/share/doc/db3.3-3.3.11.2/LICENSE
   /usr/share/doc/db3.3-3.3.11.2/README
 
@@ -76,8 +72,6 @@ Files included in the binary packages:
   /usr/bin/cygdb_cxx-3.3.dll
 
 (java-db3.3)
-  /etc/postinstall/java-db3.3.sh
-  /etc/preremove/java-db3.3.sh
   /usr/bin/cygdb_java-3.3.dll
   /usr/share/java/db-3.3.jar
 
@@ -100,6 +94,8 @@ Files included in the binary packages:
   /usr/lib/libdb_cxx-3.3.dll.a
   /usr/lib/libdb_cxx-3.3.la
   /usr/lib/libdb_java-3.3.la
+
+(db3.3-doc)
   /usr/share/doc/db3.3-3.3.11.2/html/api_c/*
   /usr/share/doc/db3.3-3.3.11.2/html/api_cxx/*
   /usr/share/doc/db3.3-3.3.11.2/html/api_java/*
@@ -114,6 +110,9 @@ Files included in the binary packages:
 ------------------
 
 Port Notes:
+
+----- version 3.3.11.2-2 -----
+Fixed alternatives script.
 
 ----- version 3.3.11.2-1 -----
 Built with cygport.
